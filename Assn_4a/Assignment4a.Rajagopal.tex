@@ -1,0 +1,252 @@
+\documentclass{article}
+
+\title{Assignment 4.a for \textbf{STATGR6103}\\
+\large submitted to Professor Andrew Gelman}
+\date{28 September 2016}
+\author{Advait Rajagopal}
+
+\usepackage{amsmath}
+\usepackage{latexsym}
+\usepackage{graphicx}
+\usepackage{amsfonts}
+\usepackage{wasysym}
+\usepackage{amssymb}
+\usepackage{mathrsfs}
+\usepackage{multirow,array}
+\usepackage{booktabs}
+\usepackage{float}
+
+\usepackage[a4paper,bindingoffset=0.2in,%
+       left=1in,right=1in,top=1in,bottom=1in,%
+          footskip=.25in]{geometry}
+\DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
+\linespread{1.3}
+\usepackage{listings}
+\usepackage[most]{tcolorbox}
+\usepackage{inconsolata}
+\newtcblisting[auto counter]{sexylisting}[2][]{sharp corners, 
+    fonttitle=\bfseries, colframe=gray, listing only, 
+    listing options={basicstyle=\ttfamily,language=java}, 
+    title=Listing \thetcbcounter: #2, #1}
+
+
+\begin{document}
+  \maketitle
+  
+ \section{Question 1}
+\textbf{Suppose that y1,...,y5 are independent samples from a Cauchy distribution with unknown center $\theta$ and known scale 1: }
+
+\begin{align*}
+\displaystyle
+p(y_i  | \theta) \propto \frac{1}{1 + (y_i - \theta)^2}
+\end{align*}
+
+\textbf{Assume that the prior distribution for $\theta$ is uniform on [0,1], and that your data are (y1,...,y5) = (-2, -1, 0, 1.5, 2.5).}
+\subsection{Part A}
+\textbf{Plot the posterior density (you can use the curve() function in R)}\\
+We know the prior distribution is;
+\begin{align}
+p(\theta) & \sim \text{Unif}(0, 1)
+\end{align}
+The likelihood follows a Cauchy distribution of the form;
+\begin{align}
+\displaystyle
+p(y_i  | \theta) & \propto \frac{1}{1 + (y_i - \theta)^2}
+\end{align}
+We thus calculate the posterior distribution $p(\theta|y)$ as follows;
+\begin{align*}
+\displaystyle
+p(\theta | y) & \propto \prod_{i=1}^{5} p(y_i | \theta) p(\theta)
+\\ 
+& \propto \prod_{i=1}^{5} \frac{1}{1 + (y_i - \theta)^2}
+\end{align*}
+We can disregard the prior distribution $p(\theta)$ in this because it is a Uniform distribution. This means the posterior density can be normalized by dividing by a normalizing factor $K$;
+\begin{align}
+\displaystyle
+K_1 = \sum_{j=1}^{N}  \prod_{i=1}^{5} \frac{1}{1 + (y_i - \theta_j)^2}
+\end{align}
+Hence we obtain the normalized posterior in equation 4.
+\begin{align}
+p(\theta | y)  &= \prod_{i=1}^{5} \frac{1}{1 + (y_i - \theta)^2} / K_1
+\end{align}
+\newpage
+To plot the posterior density we generate a sequence of $\theta$ values between 0 and 1 with breaks of 0.001 in order to capture the notion of a continuos Uniform distribution for $\theta$ as specified in the prior.
+Figure 1 shows the plot of the posterior density for a range of $\theta$ values.
+ \begin{figure}[H]
+\centering
+\includegraphics[width = 12cm, height = 8cm]{plot1.png}
+\caption{Posterior density for $\theta$}
+\label{deltat}
+\end{figure}
+
+\subsection{Part B}
+\textbf{Determine the derivative and the second derivative of the log posterior density.}
+The logarithmic transformation of the posterior density function in equation 4 is given by;
+
+\begin{align*}
+\displaystyle
+p(\theta | y) & \propto \prod_{i=1}^{5} p(y_i | \theta) p(\theta)
+\\ 
+& \propto \prod_{i=1}^{5} \frac{1}{1 + (y_i - \theta)^2}
+\end{align*}
+Taking the logarithm of the posterior yields:
+
+\begin{align}
+\displaystyle
+log(p(\theta | y)) &= K_2 - \sum_{i=1}^{5} log(1 + (y_i - \theta)^2)
+ \end{align}
+ $$\text{where} K_2 = -logK_1$$
+Differentiating equation 5 with respect to $\theta$ gives us the first derivative of the log posterior density;
+\begin{align}
+\displaystyle
+\frac{\partial(p(\theta | y))}{\partial \theta} =  \sum_{i=1}^{5} \frac{2(y_i - \theta)}{1 + (y_i - \theta)^2}
+ \end{align}
+  \newpage
+Differentiating equation 6 with respect to $\theta$ gives us the second derivative of the log posterior density;
+
+  \begin{align}
+\displaystyle
+\frac{\partial^2log(p(\theta | y))}{\partial \theta^2} = - \sum_{i=1}^{5} \frac{ 2(y_i - \theta)^2 - 2}{(1 + (y_i - \theta)^2)^2}
+ \end{align}
+ 
+ \subsection{Part C}
+ \textbf{Find the posterior mode of $\theta$ by iteratively solving the equation determined by setting the derivative of the log-likelihood to zero.}\\
+ Equations 6 and 7 give us our first and second derivative functions. My aim is to find the mode. In order to do this I regard the first derivative as a functional mapping from a domain of $\theta$ into possible values for the derivative. I want to find the point at which this function attains a value of zero. I thus iteratively examine the absolute values of each point in the derivative function until we get the value of a possible  $\theta$ which pops out the smallest absolute value of the derivative closest to zero\footnote{See R code for details}.\\
+  \begin{figure}[H]
+\centering
+\includegraphics[width = 14cm, height = 9cm]{plot2.png}
+\caption{(a)Plotting possible values of theta shows that the first derivative equals 0 at a point where $\theta$ $<$ 0 as shown by the point where the red line intersects the function(black). (b) The blue line shows the mode corresponding to the first order condition which is calculated using the iterative procedure.}
+\label{deltat}
+\end{figure}
+I infer that the true mode is;
+$$\bar{\theta} = -0.138.$$
+\newpage
+\subsection{Part D}
+\textbf{Construct the normal approximation based on the second derivative of the log posterior density at the mode. Plot the approximate normal density and compare to the exact density computed in (a)}\\
+Here my aim is to approximate a normal distribution for the posterior density. The mean of this distribution is approximated by the mode (obtained by setting the first derivative of log - likelihood equal to 0) and the variance is approximated by the inverse of the second derivative evaluated at the mode $\bar{\theta}$ \footnote{page 84, eqn 4.2 Gelman's BDA 3}.\\
+Using the second derivative in equation 7 we evaluate it at $\bar{\theta}$ = -0.138.
+  \begin{align}
+(\frac{\partial^2log(p(\theta | y))}{\partial \theta^2})^{-1} = - \sum_{i=1}^{5} \frac{ 2(y_i - \bar{\theta})^2 - 2}{(1 + (y_i - \bar{\theta})^2)^2}^{-1} = 0.7273
+ \end{align}
+ So we use the following distribution to obtain a normal approximation of the posterior density;
+ \begin{align}
+ p(\theta|y) \sim N(-0.138,0.7273)
+ \end{align}
+ Figure 3 shows the normal approximation of the initial density function and the original density function on the same plot. We see that the normal approximation is a good fit of the model as the lines are quite close together.
+ 
+ \begin{figure}[H]
+\centering
+\includegraphics[width = 12cm, height = 8cm]{plot3.png}
+\caption{Normal approximation and the true density are quite close}
+\label{deltat}
+\end{figure}
+\newpage
+\section{Code}
+\begin{sexylisting}{R Code}
+#rm(list = ls())
+setwd("/Users/Advait/Desktop/New School/Fall16/BDA/Class6")
+####
+#part A
+theta <- seq(0,1,0.001)
+n <- length(theta)
+y <- c(-2,-1,0,1.5,2.5)
+b <- 1
+
+#Creating posterior density estimates
+for(i in 1:5){ 
+  q <- b*(1/(1 + (y[i] - theta)^2))
+  b <- q
+}
+q
+#Normalizing the density using the break factor
+posterior_density_norm <- (q/(0.001*sum(q)))
+par(mfcol = c(1,1))
+plot(theta,posterior_density_norm ,
+     main = "Normalized density of theta",
+     ylim = c(0,1.3*max(posterior_density_norm)),
+     lwd = "3",
+     type = "l")
+     
+#########
+
+#part B
+#log posterior first derivative
+dlog_dtheta <- function(x) {
+  sum(2*(y - x)/(1 + (y - x)^2))
+}
+
+#log posterior second derivative
+d2log_dtheta2 <- function(x){
+  sum(2*(-1 + (y - x)^2)/(1 + (y - x)^2)^2)
+}
+########
+\end{sexylisting}
+\newpage
+\begin{sexylisting}{R Code contd.}
+#part C
+theta.guess <- seq(-1.0,1,0.001)
+#Plot derivatives to see where 0 is
+d1 = rep(0,length(theta.guess))
+for (i in 1:length(theta.guess)){
+  d1[i] = dlog_dtheta(theta.guess[i])  
+}    
+length(theta.guess)
+plot(theta.guess, d1,
+     main = "Plot of first derivative and possible mode",
+     xlab = "theta.guess",
+     ylab = "first derivatives",
+     type = "l",
+     lwd = 3)
+abline(h=0,col = "red",lty = 2)
+
+#Find the mode by iteration
+abs_min <- abs(dlog_dtheta(theta[1]))
+location <- 1
+for (i in 2:length(theta.guess)){
+  if(abs_min > abs(dlog_dtheta(theta.guess[i])))
+  {abs_min <- abs(dlog_dtheta(theta.guess[i]))
+   location <- i
+  }
+}
+print(theta.guess[location])
+par(mfcol = c(1,2))
+plot(theta.guess, d1,
+     main = "Plot of first derivative and possible mode",
+     xlab = "theta.guess",
+     ylab = "first derivatives",
+     type = "l",
+     lwd = 3)
+abline(h=0,col = "red",lty = 2)
+plot(theta.guess, d1,
+     main = "True mode shown by blue line",
+     xlab = "theta.guess",
+     ylab = "first derivatives",
+     type = "l",
+     lwd = 3)
+abline(h=0,col = "red",lty = 2)
+abline(v=-0.138, col = "blue", lty = 2)
+\end{sexylisting}
+\newpage
+\begin{sexylisting}{R Code contd.}
+#part D
+stdev <- sqrt(1/-d2log_dtheta2(-0.138))
+norm_density <- dnorm(theta, -0.138, stdev)
+normalize <- norm_density/(0.001*sum(norm_density))
+par(mfcol = c(1,1))
+plot(theta,posterior_density_norm ,
+     main = "Normal approximation is a good fit",
+     ylim = c(0,1.3*max(posterior_density_norm)),
+     lwd = "3",
+     type = "l")
+lines(theta, normalize, col = "red",lwd = 2)
+legend(0.7, 1.2, legend = c("True density", "Normal Approx"), 
+           col = c("black", "red"),
+           bty = "n", cex = 1, lty = c(1, 1), lwd = c(2, 2))
+
+\end{sexylisting}
+
+
+
+ 
+  
+\end{document}

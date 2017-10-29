@@ -1,0 +1,261 @@
+\documentclass{article}
+
+\title{Assignment 3.a for \textbf{STATGR6103}\\
+\large submitted to Professor Andrew Gelman}
+\date{21 September 2016}
+\author{Advait Rajagopal}
+
+\usepackage{amsmath}
+\usepackage{latexsym}
+\usepackage{graphicx}
+\usepackage{amsfonts}
+\usepackage{wasysym}
+\usepackage{amssymb}
+\usepackage{mathrsfs}
+\usepackage{multirow,array}
+\usepackage{booktabs}
+\usepackage{float}
+
+\usepackage[a4paper,bindingoffset=0.2in,%
+            left=1in,right=1in,top=1in,bottom=1in,%
+            footskip=.25in]{geometry}
+\DeclareMathAlphabet{\mathpzc}{OT1}{pzc}{m}{it}
+\linespread{1.3}
+\usepackage{listings}
+\usepackage[most]{tcolorbox}
+\usepackage{inconsolata}
+\newtcblisting[auto counter]{sexylisting}[2][]{sharp corners, 
+    fonttitle=\bfseries, colframe=gray, listing only, 
+    listing options={basicstyle=\ttfamily,language=java}, 
+    title=Listing \thetcbcounter: #2, #1}
+
+
+\begin{document}
+  \maketitle
+
+  \section{Question 1}
+\textbf{In the bioassay example of Section 3.7, replace the uniform prior density by a joint normal prior distribution on $(\alpha, \beta)$, with $\alpha \sim$ N$(0, 2^2)$, $\beta \sim$ N$(10, 10^2)$, and $\rho_{\alpha \beta} $ = 0.5.\\}
+[In the rest of this assignment I denote $\alpha$ by b1 and $\beta$ by b2 respectively, for ease of notation]
+\subsection{Part A}
+\textbf{Fit this model in Stan.}\\
+\subsubsection{Uniform or Flat prior}
+In the first attempt I model parameters b1 and b2 as coming from a uniform distribution on the whole real line obtaining MLE estimates for the parameters b1 and b2 and the $\theta_i$ values for each of the 4 dosage levels $(i = 1,..,4)$. The number of deaths $y$ follows a binomial distribution with $n = 5$ and probability of death $\theta$. The parameters b1 and b2 are such that logit($\theta_i$) = (b1 + b2*$x_i$), where $x_i$ is the dosage of treatment. Therefore the  model is;
+$$y_i|\theta_i \sim Bin(n_i,\theta_i)$$
+where each $\theta_i$ is transformed as below;
+$$ \theta_i  = logit^{-1} (b1 + b2*x_{i})$$
+\subsubsection{Multivariate normal prior for b1 and b2}
+We are instructed to use a multivariate normal prior (MVN) distribution for the parameters b1 and b2 such that;
+$$b1 \sim N(0, 2^2) $$
+$$b2 \sim N(10, 10^2) $$
+with correlation between b1 and b2, $\rho_{b1b2}$ = 0.5. This means the diagonal elements of the covariance matrix are $\sigma^2_{b1} = 2^2$ and $\sigma^2_{b2} = 10^2$ and the off diagonal terms are both $\rho_{b1b2}*\sigma_{b1}*\sigma_{b2}$.\footnote{See Stan code for full model}
+\newpage
+\subsection{Part B}
+\textbf{Use numerical summaries and graphs to compare your inferences to what was obtained using a flat prior in Section 3.7.}\\
+Tables 1 and 2 below show the estimates of the parameters with a flat prior and an MVN prior respectively. There does not seem to be much variation between the two cases as b1 $\sim$ N$(1.46,1.09^2)$, b2 $\sim$ N$(12.03,5.84^2)$ with a uniform or flat prior and b1 $\sim$ N$(0.94,0.87^2)$, b2 $\sim$ N$(10.25,4.09^2)$ with a MVN prior distribution. The values of the mean and variance of b1 and b2 have become smaller.
+
+\begin{table}[H]
+\centering
+\caption{Parameter estimates with a flat prior}
+\label{my-label}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+Parameter  & Mean  & SD   & 2.5\% & 50\%  & 97.5\% \\ \hline
+b1         & 1.46  & 1.09 & -0.37 & 1.39  & 4.11   \\ \hline
+b2         & 12.03 & 5.84 & 3.80  & 11.03 & 25.45  \\ \hline
+$\theta_1$ & 0.01  & 0.02 & 0.00  & 0.00  & 0.06   \\ \hline
+$\theta_2$ & 0.16  & 0.13 & 0.01  & 0.12  & 0.48   \\ \hline
+$\theta_3$ & 0.67  & 0.17 & 0.31  & 0.69  & 0.95   \\ \hline
+$\theta_4$ & 0.99  & 0.02 & 0.93  & 1.00  & 1.00   \\ \hline
+\end{tabular}
+\end{table}
+
+\begin{table}[H]
+\centering
+\caption{Parameter estimates with a MVN prior}
+\label{my-label}
+\begin{tabular}{|c|c|c|c|c|c|}
+\hline
+Parameter  & Mean  & SD   & 2.5\% & 50\% & 97.5\% \\ \hline
+b1         & 0.94  & 0.87 & -0.67 & 0.89 & 2.62   \\ \hline
+b2         & 10.25 & 4.09 & 3.46  & 9.90 & 19.59  \\ \hline
+$\theta_1$ & 0.01  & 0.02 & 0.00  & 0.00 & 0.06   \\ \hline
+$\theta_2$ & 0.14  & 0.11 & 0.01  & 0.20 & 0.42   \\ \hline
+$\theta_3$ & 0.59  & 0.17 & 0.26  & 0.72 & 0.88   \\ \hline
+$\theta_4$ & 0.99  & 0.02 & 0.93  & 1.00 & 1.00   \\ \hline
+\end{tabular}
+\end{table}
+
+Figure 1 shows a scatter plot with the estimates of b1 and b2 compared to each other for a flat prior and MVN prior estimation. The points show the clustering of estimates and the dotted lines represent the mean of these estimates.
+ \begin{figure}[H]
+\centering
+\includegraphics[width = 12cm, height = 6cm]{scatterplots.png}
+\caption{Comparison of b1 and b2}
+\label{deltat}
+\end{figure}
+
+Figure 2 shows the density function of the parameters b1 and b2 using a flat prior and and MVN prior respectively. The line shows the mean of these estimates.
+ \begin{figure}[H]
+\centering
+\includegraphics[width = 12cm, height = 8cm]{densityplots.png}
+\caption{Density of b1 and b2}
+\label{deltat}
+\end{figure}
+
+Figure 3 shows the density of the parameters $\theta_i$ representing probability of death at a given dosage level $i$ with a flat prior and with a MVN prior respectively.
+ \begin{figure}[H]
+\centering
+\includegraphics[width = 13cm, height = 9cm]{thetadensity.png}
+\caption{Density of $\theta_i$}
+\label{deltat}
+\end{figure}
+\newpage
+
+\subsection{LD 50}
+We draw b1 and b2 from the estimated posterior distribution and calculate LD50 which is the dose level at which probability of death is 50\%. Thus for us a 50\% survival rate corresponds to;
+$$LD50 : E(\frac{y_i}{n_i}) = logit^{-1}(b1 + b2*x_i) = 0.5$$
+simplifying this yields LD50 = -b1/b2. This calculation is done for the values drawn from the posterior distribution and the corresponding histogram is shown in Figure 4.
+ \begin{figure}[H]
+\centering
+\includegraphics[width = 11cm, height = 8cm]{ld50.png}
+\caption{LD50}
+\label{deltat}
+\end{figure}
+
+\subsection{Conclusion about comparative inferences}
+We observe that b1 and b2 both have lower means and variances when we use an MVN prior instead of a flat prior. However the MVN prior we use has a large variance and given the data variation it does not dominate the data too much so we get similar results to the uniform prior case even when we use an MVN prior. The estimates of $\theta$ are also largely similar with an increasing probability of death as the number of deaths $y_i$ at each dosage level increases.
+
+\section{Code}
+
+\begin{sexylisting}{R Code}
+setwd("/Users/Advait/Desktop/New School/Fall16/BDA/Class4")
+N <- 4
+n <- 5
+y <- c(0,1,3,5)
+x  <- c(-0.86, -0.30, -0.05, 0.73)
+table <- cbind(y,x)
+table <- as.data.frame(table)
+str(table)
+y <- table$y
+x <- table$x
+##Bayesian estimation
+#With a uniform prior on b1 and b2
+library(rstan)
+rstan_options(auto_write = TRUE)
+options(mc.cores = parallel::detectCores())
+stanc("3a.stan")
+fit1 <- stan("3a.stan", data = list("N", "y", "x"),
+                  iter = 1000, chains = 3)
+print(fit1)
+ext1 <- extract(fit1)
+b1 <- ext1$b1
+b2 <- ext1$b2
+theta11 <- ext1$theta[,1]
+theta12 <- ext1$theta[,2]
+theta13 <- ext1$theta[,3]
+theta14 <- ext1$theta[,4]
+#With a multivariate normal prior on b1 and b2
+sigma <- matrix(data =c(4,0.5*sqrt(4)*sqrt(100),
+                                       0.5*sqrt(4)*sqrt(100),100),
+                                       nrow=2,ncol=2)
+ab <- c(0,10)
+fit2 <- stan("3a_2.stan", data = list("N", "y", "x","sigma","ab"),
+                  iter = 1000, chains = 3)
+print(fit2)
+ext2 <- extract(fit2)
+b1new <- ext2$b[,1]
+b2new <- ext2$b[,2]
+theta21 <- ext2$theta[,1]
+theta22 <- ext2$theta[,2]
+theta23 <- ext2$theta[,3]
+theta24 <- ext2$theta[,4]
+\end{sexylisting}
+\begin{sexylisting}{R Code continued [Plots]}
+#Scatter plots
+par(mfcol = c(1,2))
+plot(b1,b2,pch = 16, main = "Flat prior estimates of b1 and b2", 
+     xlim = c(-4,10),ylim = c(-10 ,40) , cex = .5 )
+abline(v = mean(b1), lty = 2,col = "red")
+abline(h = mean(b2), lty = 2,col = "red")
+plot(b1new, b2new, pch  = 16, main = "MVN prior for b1 and b2",
+     xlim = c(-4,10),ylim = c(-10 ,40) , cex = .5)
+abline(v = mean(b1new), lty = 2 , col = "red")
+abline(h = mean(b2new), lty = 2,col = "red")
+
+#Plot densities of b1 and b2
+par(mfcol = c(2,2))
+plot(density(b1), main = "Density of b1 flat prior")
+abline(v = mean(b1), col = "red")
+plot(density(b2), main = "Density of b2 flat prior")
+abline(v = mean(b2), col = "red")
+plot(density(b1new), main = "Density of b1 MVN prior")
+abline(v = mean(b1new), col = "red")
+plot(density(b2new), main = "Density of b2 MVN prior")
+abline(v = mean(b2new), col = "red")
+
+##Plot flat prior theta densities
+par(mfcol = c(2,4))
+plot(density(theta11), main = "Density of theta1, flat prior")
+abline(v = mean(theta11), col = "red")
+plot(density(theta21), main = "Density of theta1, mvn prior")
+abline(v = mean(theta21), col = "red")
+plot(density(theta12), main = "Density of theta2, flat prior")
+abline(v = mean(theta12), col = "red")
+plot(density(theta22), main = "Density of theta2, mvn prior")
+abline(v = mean(theta22), col = "red")
+plot(density(theta13), main = "Density of theta3, flat prior")
+abline(v = mean(theta13), col = "red")
+plot(density(theta23), main = "Density of theta3, mvn prior")
+abline(v = mean(theta23), col = "red")
+plot(density(theta14), main = "Density of theta4, flat prior")
+abline(v = mean(theta14), col = "red")
+plot(density(theta24), main = "Density of theta4, mvn prior")
+abline(v = mean(theta24), col = "red")
+ld50 <- -(b1new/b2new)
+hist(ld50,breaks=65,xlab = "LD50", main=NULL, yaxt = "n", ylab=NULL)
+\end{sexylisting}
+\newpage
+\begin{sexylisting}{Stan Code with Uniform Prior}
+data{
+int N;
+int n;
+int y[N];
+real x[N]; 
+}
+parameters{
+real b1; 
+real b2; 
+}
+transformed parameters{
+  real theta[N];
+  for (i in 1:N)
+    theta[i] = inv_logit(b1 + b2*x[i]);
+  }
+model{
+y ~ binomial(5,theta);
+}
+\end{sexylisting}
+\begin{sexylisting}{Stan Code with Multivariate Normal Prior}
+data{
+int N;
+int y[N];
+real x[N]; 
+matrix[2,2] sigma;
+vector[2] ab;
+}
+parameters{
+vector[2] b; 
+}
+transformed parameters{
+  real theta[N];
+  for (i in 1:N)
+    theta[i] = inv_logit(b[1] + b[2]*x[i]);
+}
+model{
+y ~ binomial(5,theta);
+b ~ multi_normal(ab,sigma);
+}
+\end{sexylisting}
+
+
+  
+\end{document}
