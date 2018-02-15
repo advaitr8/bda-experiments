@@ -1,3 +1,2 @@
-# BDA_Rajagopal_F16
-Experiments with Bayesian data analysis
-BDA-3
+# Bayesian Data Analysis experiments
+This repo has some examples for Bayesian applied statistics and data analysis. It also has Stan code to run Bayesian hierarchical model.
